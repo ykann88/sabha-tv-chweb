@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بث سبها TV المباشر</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        /* تصميم شاشة الانتظار (عندما يكون البث مغلقاً) */
+        #offline-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #0b0b0b;
+            color: #ffffff;
+            z-index: 10;
+        }
+        #offline-screen img {
+            max-width: 80%;
+            max-height: 70%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        #offline-screen p {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #888888;
+        }
+        /* نافذة البث المباشر */
+        #live-container {
+            width: 100%;
+            height: 100%;
+            display: none; /* مخفية افتراضياً حتى يتفعل البث */
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- شاشة الانتظار: تعرض صورتك أو شعارك عندما لا يوجد بث -->
+    <div id="offline-screen">
+        <!-- ضع هنا رابط صورتك المباشرة أو شعار القناة بين العلامتين "" -->
+        <img src="https://i.imgur.com/your-image-placeholder.png" alt="سبها TV - شاشة الانتظار">
+        <p>البث متوقف حالياً. تابعونا في مواعيد البث الرسمية.</p>
+    </div>
+
+    <!-- نافذة البث المباشر من Kick -->
+    <div id="live-container">
+        <!-- تم وضع اسم قناتك sebhatv-ch تلقائياً في رابط البث -->
+        <iframe src="https://player.kick.com/sebhatv-ch" 
+                allowfullscreen="true" 
+                scrolling="no">
+        </iframe>
+    </div>
+
+    <script>
+        // تحكم في حالة البث:
+        // اجعلها true عندما تكون "مباشر" لكي يظهر البث، واجعلها false لكي تظهر صورة شاشة الانتظار
+        var isLive = false; 
+
+        if (isLive) {
+            document.getElementById('offline-screen').style.display = 'none';
+            document.getElementById('live-container').style.display = 'block';
+        } else {
+            document.getElementById('offline-screen').style.display = 'flex';
+            document.getElementById('live-container').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
