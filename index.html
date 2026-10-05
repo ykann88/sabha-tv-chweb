@@ -2,113 +2,369 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0,
+                   maximum-scale=1.0, user-scalable=no">
+
+    <meta name="theme-color" content="#000000">
+
     <title>تلفزيون سبها - البث المباشر</title>
+
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
-        body, html {
+
+        html,
+        body {
             width: 100%;
             height: 100%;
-            background-color: #000000;
+            background: #000;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
+            font-family: Arial, Tahoma, sans-serif;
         }
-        
-        .screen-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
+
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* حاوية البث المباشر من Kick */
-        #live-container {
+        /* شاشة التوقف */
+        #offlineScreen {
             width: 100%;
             height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* تصميم شاشة الانتظار (تظهر عند توقف البث أو كخلفية) */
-        #offline-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
+            background: #000;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 20px;
-            z-index: 10;
+            padding: 25px;
         }
 
-        #offline-screen img {
-            width: 140px;
-            height: 140px;
+        /* شعار القناة */
+        #channelLogo {
+            width: min(190px, 45vw);
+            height: auto;
+            margin-bottom: 28px;
             object-fit: contain;
-            margin-bottom: 20px;
-            border-radius: 10px;
         }
 
-        .broadcast-info {
+        .offline-title {
             color: #ffffff;
-            font-size: 22px;
+            font-size: clamp(20px, 4vw, 34px);
             font-weight: bold;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .offline-subtitle {
+            color: #ffffff;
+            font-size: clamp(15px, 3vw, 23px);
+            line-height: 1.8;
             margin-bottom: 10px;
         }
 
-        .broadcast-schedule {
-            color: #00ffcc;
-            font-size: 16px;
-            background: rgba(0, 255, 204, 0.1);
-            padding: 8px 20px;
-            border-radius: 20px;
+        .broadcast-time {
+            color: #8cff8c;
+            font-size: clamp(15px, 3vw, 22px);
+            font-weight: bold;
+            line-height: 1.8;
+        }
+
+        /* مشغل البث */
+        #playerContainer {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #kickPlayer {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            height: auto;
+            max-height: 100vh;
+            border: 0;
+            background: #000;
+        }
+
+        /* الوضع الأفقي */
+        @media (orientation: landscape) {
+
+            #kickPlayer {
+                width: 100vw;
+                height: 100vh;
+                aspect-ratio: 16 / 9;
+                object-fit: contain;
+            }
+
+        }
+
+        /* الوضع العمودي */
+        @media (orientation: portrait) {
+
+            #playerContainer {
+                padding: 0;
+            }
+
+            #kickPlayer {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 16 / 9;
+                object-fit: contain;
+            }
+
+        }
+
+        /* منع تحديد العناصر */
+        body,
+        iframe,
+        img {
+            -webkit-user-select: none;
+            user-select: none;
         }
     </style>
 </head>
+
 <body>
 
-    <div class="screen-container">
-        
-        <!-- شاشة الانتظار (تظهر الشعار ومواعيد البث) -->
-        <div id="offline-screen">
-            <!-- 📌 ضع رابط شعار قناتك بصيغة PNG هنا مباشرة -->
-            <img src="ضع_رابط_شعارك_هنا.png" alt="شعار تلفزيون سبها">
-            
-            <div class="broadcast-info">البث متوقف مؤقتاً.. ننتظركم في المواعيد الرسمية</div>
-            <div class="broadcast-schedule">📅 مواعيد البث: يومياً من السابعة مساءً إلى منتصف الليل</div>
+    <!-- شاشة البث المتوقف -->
+    <div id="offlineScreen">
+
+        <!--
+        ضع شعار تلفزيون سبها داخل نفس مجلد index.html
+        وسمّه:
+        logo.png
+        -->
+        <img
+            id="channelLogo"
+            src="logo.png"
+            alt="تلفزيون سبها"
+        >
+
+        <div class="offline-title">
+            البث متوقف حالياً...
         </div>
 
-        <!-- نافذة البث المباشر الحي من منصة Kick لقناتك sebhatv_ch -->
-        <div id="live-container">
-            <iframe src="https://player.kick.com/sebhatv_ch" 
-                    allowfullscreen="true" 
-                    scrolling="no" 
-                    autoplay>
-            </iframe>
+        <div class="offline-subtitle">
+            ننتظركم في تلفزيون سبها في مواعيد البث الرسمية
+        </div>
+
+        <div class="broadcast-time">
+            مواعيد البث الرسمية : يومياً من السابعة مساء حتى منتصف الليل
         </div>
 
     </div>
+
+
+    <!-- مشغل Kick -->
+    <div id="playerContainer">
+
+        <iframe
+            id="kickPlayer"
+            src="https://player.kick.com/sebhatv_ch"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            allowfullscreen
+            frameborder="0">
+        </iframe>
+
+    </div>
+
+
+    <script>
+
+        /*
+         * اسم قناة Kick
+         */
+        const CHANNEL = "sebhatv_ch";
+
+
+        /*
+         * عناصر الصفحة
+         */
+        const offlineScreen =
+            document.getElementById("offlineScreen");
+
+        const playerContainer =
+            document.getElementById("playerContainer");
+
+
+        /*
+         * إظهار شاشة التوقف
+         */
+        function showOffline() {
+
+            offlineScreen.style.display = "flex";
+
+            playerContainer.style.display = "none";
+        }
+
+
+        /*
+         * إظهار البث
+         */
+        function showLive() {
+
+            offlineScreen.style.display = "none";
+
+            playerContainer.style.display = "flex";
+        }
+
+
+        /*
+         * فحص حالة قناة Kick
+         *
+         * يعتمد على واجهة Kick العامة.
+         *
+         * إذا تغيرت واجهة Kick مستقبلاً،
+         * يمكن تعديل رابط الفحص فقط.
+         */
+        async function checkLiveStatus() {
+
+            try {
+
+                const response = await fetch(
+                    "https://kick.com/api/v2/channels/" + CHANNEL,
+                    {
+                        method: "GET",
+                        cache: "no-store"
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Kick API error");
+                }
+
+                const data = await response.json();
+
+
+                /*
+                 * إذا كان هناك بث مباشر
+                 */
+                if (
+                    data &&
+                    data.livestream &&
+                    data.livestream.is_live === true
+                ) {
+
+                    showLive();
+
+                } else {
+
+                    showOffline();
+
+                }
+
+            } catch (error) {
+
+                /*
+                 * عند تعذر الوصول إلى حالة Kick
+                 * نبقي شاشة الانتظار ظاهرة.
+                 */
+                showOffline();
+
+                console.log(
+                    "تعذر التحقق من حالة البث:",
+                    error
+                );
+            }
+        }
+
+
+        /*
+         * الفحص الأول عند فتح التطبيق
+         */
+        checkLiveStatus();
+
+
+        /*
+         * إعادة الفحص كل 15 ثانية
+         */
+        setInterval(
+            checkLiveStatus,
+            15000
+        );
+
+
+        /*
+         * محاولة جعل الوضع الأفقي عند ملء الشاشة
+         *
+         * ليس كل المتصفحات تسمح بهذا.
+         */
+        async function tryLandscape() {
+
+            try {
+
+                if (
+                    screen.orientation &&
+                    screen.orientation.lock
+                ) {
+
+                    await screen.orientation.lock("landscape");
+
+                }
+
+            } catch (error) {
+
+                console.log(
+                    "الجهاز لا يسمح بقفل الاتجاه:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+         * عند تغيير اتجاه الهاتف
+         * نعيد ضبط حجم المشغل.
+         */
+        window.addEventListener(
+            "orientationchange",
+            function () {
+
+                setTimeout(
+                    function () {
+
+                        window.dispatchEvent(
+                            new Event("resize")
+                        );
+
+                    },
+                    300
+                );
+
+            }
+        );
+
+
+        /*
+         * إعادة الفحص عند العودة إلى التطبيق
+         */
+        document.addEventListener(
+            "visibilitychange",
+            function () {
+
+                if (
+                    document.visibilityState === "visible"
+                ) {
+
+                    checkLiveStatus();
+
+                }
+
+            }
+        );
+
+    </script>
 
 </body>
 </html>
