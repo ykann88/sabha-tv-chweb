@@ -25,7 +25,7 @@
             background-color: #000000;
         }
 
-        /* مشغل البث المباشر من كيك يملأ الشاشة بالكامل في الخلفية */
+        /* مشغل البث المباشر من كيك يملأ الشاشة مع السماح بالتمرير لظهور خيارات الجودات */
         #live-container {
             width: 100%;
             height: 100%;
@@ -41,7 +41,7 @@
             border: none;
         }
 
-        /* شاشة الانتظار المؤقتة (تظهر الشعار، العبارة، ومواعيد البث) */
+        /* شاشة الانتظار المؤقتة */
         #offline-screen {
             position: absolute;
             top: 0;
@@ -87,7 +87,7 @@
 
     <div class="screen-container">
         
-        <!-- شاشة الانتظار السوداء (تختفي تلقائياً عند نجاح جلب حالة البث) -->
+        <!-- شاشة الانتظار السوداء -->
         <div id="offline-screen">
             <!-- 📌 استبدل الرابط أدناه برابط شعار قناتك الـ PNG المباشر -->
             <img src="ضع_رابط_شعارك_هنا.png" alt="شعار تلفزيون سبها">
@@ -96,12 +96,12 @@
             <div class="broadcast-schedule">📅 مواعيد البث: يومياً من السابعة مساءً إلى منتصف الليل</div>
         </div>
 
-        <!-- نافذة البث المباشر من موقع كيك -->
+        <!-- نافذة البث المباشر مع تفعيل الصوت والجودات الكاملة -->
         <div id="live-container">
-            <iframe src="https://player.kick.com/sebhatv-ch?autoplay=true" 
+            <iframe src="https://player.kick.com/sebhatv-ch?autoplay=true&muted=false" 
                     allowfullscreen="true" 
-                    scrolling="no" 
-                    allow="autoplay; encrypted-media; fullscreen">
+                    scrolling="yes" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
             </iframe>
         </div>
 
@@ -114,14 +114,12 @@
                 let data = await response.json();
                 let offlineScreen = document.getElementById('offline-screen');
 
-                // إذا كانت القناة تبث حياَ، نقوم بإخفاء شاشة الشعار السوداء لتظهر شاشة البث بالكامل والصوت
                 if (data && data.livestream && data.livestream.is_live === true) {
                     offlineScreen.style.opacity = '0';
                     setTimeout(() => {
                         offlineScreen.style.display = 'none';
                     }, 500);
                 } else {
-                    // إذا توقف البث، تعود شاشة الشعار والعبارات بالظهور
                     offlineScreen.style.display = 'flex';
                     offlineScreen.style.opacity = '1';
                 }
@@ -130,7 +128,6 @@
             }
         }
 
-        // الفحص المباشر عند التحميل وكل 10 ثوانٍ
         checkLiveStatus();
         setInterval(checkLiveStatus, 10000);
     </script>
