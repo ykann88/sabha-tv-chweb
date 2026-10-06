@@ -31,7 +31,7 @@
             background-color: #000000;
         }
 
-        /* نافذة البث المباشر من كيك (تأخذ الشاشة كاملة) */
+        /* نافذة البث المباشر من كيك */
         #live-container {
             width: 100%;
             height: 100%;
@@ -39,6 +39,7 @@
             top: 0;
             left: 0;
             z-index: 1;
+            display: none; /* مخفي افتراضياً حتى يتحقق السكريبت من حالة البث */
         }
 
         iframe {
@@ -61,7 +62,7 @@
             align-items: center;
             text-align: center;
             padding: 20px;
-            z-index: 10; /* تكون فوق البث لتخفيه عند التوقف */
+            z-index: 10;
         }
 
         #offline-screen img {
@@ -86,28 +87,13 @@
             padding: 8px 20px;
             border-radius: 20px;
         }
-
-        /* زر يدوي لتبديل العرض عند الحاجة */
-        .toggle-btn {
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
-            z-index: 20;
-            background: rgba(255, 255, 204, 0.2);
-            color: #fff;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-        }
     </style>
 </head>
 <body>
 
     <div class="screen-container">
         
-        <!-- شاشة الانتظار (تظهر الشعار ومواعيد البث) -->
+        <!-- شاشة الانتظار (تظهر الشعار ومواعيد البث في حالة التوقف) -->
         <div id="offline-screen">
             <!-- 📌 استبدل الرابط أدناه برابط شعار قناتك الـ PNG المباشر -->
             <img src="https://up6.cc/2026/10/179127789244141.png" alt="شعار تلفزيون سبها">
@@ -116,9 +102,9 @@
             <div class="broadcast-schedule">📅 مواعيد البث: يومياً من السابعة مساءً إلى منتصف الليل</div>
         </div>
 
-        <!-- نافذة البث المباشر الحقيقي من موقع كيك بجودات كاملة وصوت -->
+        <!-- نافذة البث المباشر الحقيقي من موقع كيك -->
         <div id="live-container">
-            <iframe src="https://player.kick.com/sebhatv-ch?autoplay=true" 
+            <iframe id="kick-iframe" 
                     allowfullscreen="true" 
                     scrolling="no" 
                     allow="autoplay; encrypted-media; fullscreen">
@@ -127,18 +113,43 @@
 
     </div>
 
-    <button class="toggle-btn" onclick="toggleScreen()">إظهار/إخفاء الشاشة</button>
-
     <script>
-        // دالة اختيارية للتحكم اليدوي السريع في إظهار أو إخفاء شاشة الانتظار فوق البث
-        function toggleScreen() {
-            var screen = document.getElementById('offline-screen');
-            if (screen.style.display === 'none') {
-                screen.style.display = 'flex';
-            } else {
-                screen.style.display = 'none';
+        // دالة ذكية لفحص حالة البث المباشر لقناة sebhatv-ch من منصة كيك تلقائياً
+        async function checkChannelStatus() {
+            try {
+                // استعلام بيانات القناة من واجهة كيك العامة
+                let response = await fetch('https://kick.com/api/v2/channels/sebhatv-ch');
+                let data = await response.json();
+                
+                let offlineScreen = document.getElementById('offline-screen');
+                let liveContainer = document.getElementById('live-container');
+                let iframe = document.getElementById('kick-iframe');
+
+                // التحقق هل القناة تبث حالياً (livestream ليس فارغاً وليست null)
+                if (data && data.livestream && data.livestream.is_live === true) {
+                    // حالة البث: يعمل
+                    if (liveContainer.style.display !== 'block') {
+                        iframe.src = "https://player.kick.com/sebhatv-ch?autoplay=true";
+                        liveContainer.style.display = 'block';
+                    }
+                    offlineScreen.style.display = 'none'; // إخفاء شاشة الشعار السوداء فوراً
+                } else {
+                    // حالة البث: متوقف
+                    offlineScreen.style.display = 'flex'; // إظهار شاشة الشعار ومواعيد البث
+                    liveContainer.style.display = 'none';
+                    iframe.src = ""; // إيقاف تحميل مشغل كيك لمنع الصوت في الخلفية
+                }
+            } catch (error) {
+                // في حال عدم توفر الاتصال أو حظر الـ API مؤقتأً، نظهر شاشة الانتظار كأمان
+                console.log("جارٍ إعادة محاولة التحقق من حالة البث...");
             }
         }
+
+        // فحص حالة البث فور فتح الصفحة
+        checkChannelStatus();
+
+        // إعادة فحص حالة البث تلقائياً كل 15 ثانية لضمان التبديل الفوري عند بدء أو انتهاء البث
+        setInterval(checkChannelStatus, 15000);
     </script>
 
 </body>
